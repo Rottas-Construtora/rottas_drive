@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { StorageGauge } from "@/components/StorageGauge";
 import { useAuthContext } from "@/components/AuthProvider";
+import logo from "@/assets/logo.png";
 
 const baseMenuItems = [
   { title: "Coleções", url: "/home", icon: Building2 },
@@ -33,8 +34,8 @@ export function AppSidebar() {
       <SidebarHeader className="px-2 py-4 group-data-[collapsible=icon]:!px-0">
         <div className="flex items-center gap-3 overflow-hidden justify-center">
           <img
-            src="/Brand/rottas_logo_laranja.png"
-            alt="Rottas"
+            src={logo}
+            alt="Rottas Drive"
             className="h-7 w-7 object-contain shrink-0 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6"
           />
           <span
