@@ -19,6 +19,7 @@ import Perfil from "./pages/Perfil";
 import Lixeira from "./pages/Lixeira";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,7 +66,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-      <Route path="/" element={<Navigate to="/home" replace />} />
+      <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
       <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
       <Route path="/workspace/:workspaceId" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
       <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />

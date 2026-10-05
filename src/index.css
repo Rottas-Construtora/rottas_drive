@@ -199,3 +199,24 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Animação "bichinhos" da landing/login (FileRunners) */
+@keyframes rdRun{0%{left:4%}24.8%{left:56%}34.4%,100%{left:100%}}
+@keyframes rdJump{0%{transform:translateY(0) scale(1);opacity:0}2.4%{opacity:1}24.8%{transform:translateY(0) scale(1);opacity:1}29.6%{transform:translateY(-52px) scale(.92);opacity:1}34.4%,100%{transform:translateY(0) scale(.3);opacity:0}}
+@keyframes rdThighA{0%,100%{transform:rotate(35deg)}50%{transform:rotate(-35deg)}}
+@keyframes rdThighB{0%,100%{transform:rotate(-35deg)}50%{transform:rotate(35deg)}}
+@keyframes rdShinA{0%,100%{transform:rotate(-10deg)}25%{transform:rotate(-60deg)}50%{transform:rotate(-5deg)}}
+@keyframes rdShinB{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(-10deg)}75%{transform:rotate(-60deg)}}
+@keyframes rdBlink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.1)}}
+@keyframes rdLook{0%,18%{transform:translate(0,0)}24%,42%{transform:translate(-3px,0)}48%,62%{transform:translate(2px,-1px)}68%,84%{transform:translate(2px,1px)}90%,100%{transform:translate(0,0)}}
+@keyframes rdRunTrip{0%{left:4%}9.6%{left:26%}12%{left:31%}20%{left:31%}26.4%{left:56%}34.4%,100%{left:100%}}
+@keyframes rdJumpTrip{0%{transform:translateY(0) rotate(0);opacity:0}2.4%{opacity:1}9.6%{transform:translateY(0) rotate(0)}12%{transform:translateY(8px) rotate(var(--fall));opacity:1}17.6%{transform:translateY(8px) rotate(var(--fall))}20%{transform:translateY(-6px) rotate(0)}21.6%{transform:translateY(0) rotate(0)}26.4%{transform:translateY(0) scale(1)}30.4%{transform:translateY(-52px) scale(.92);opacity:1}34.4%,100%{transform:translateY(0) scale(.3);opacity:0}}
+@keyframes rdRunHes{0%{left:4%}15.2%{left:54%}28%{left:54%}34.4%,100%{left:100%}}
+@keyframes rdJumpHes{0%{transform:translate(0,0);opacity:0}2.4%{opacity:1}15.2%{transform:translate(0,0) rotate(0)}17.2%{transform:translate(0,0) rotate(var(--lean))}19.2%{transform:translate(-2px,0) rotate(var(--lean))}20.4%{transform:translate(2px,0)}21.6%{transform:translate(-2px,0)}22.8%{transform:translate(2px,0)}24%{transform:translate(0,0) rotate(0)}26.4%{transform:translate(0,4px) scale(1.08,.82)}28%{transform:translate(0,0) scale(1)}31.2%{transform:translate(0,-64px) scale(.95);opacity:1}34.4%,100%{transform:translate(0,0) scale(.3);opacity:0}}
+@keyframes rdDust{0%{transform:translate(0,0) scale(.3);opacity:.7}100%{transform:translate(var(--dx),-6px) scale(1.5);opacity:0}}
+@keyframes rdSweat{0%,30%{transform:translate(0,0);opacity:0}40%{opacity:1}100%{transform:translate(4px,10px);opacity:0}}
+@keyframes rdLaugh{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.6)}}
+@keyframes rdWobble{0%,100%{transform:translateX(-.5px)}50%{transform:translateX(.5px)}}
+@keyframes rdTear{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translateY(14px) scale(1);opacity:0}}
+@keyframes rdBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes rdGulp{0%,45%,100%{transform:scale(1)}13%{transform:scale(1.07)}30%{transform:scale(.98)}}
