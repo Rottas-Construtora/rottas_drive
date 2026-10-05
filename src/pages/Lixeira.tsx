@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuthContext } from "@/components/AuthProvider";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function Lixeira() {
   const { data: trashArquivos, isLoading: loadingArquivos } = useTrashArquivos();
@@ -180,13 +181,15 @@ export default function Lixeira() {
             ))}
           </div>
         ) : totalItems === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Trash2 className="h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground">A lixeira está vazia</h3>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Arquivos e pastas excluídos aparecerão aqui
-            </p>
-          </div>
+          <EmptyState
+            icon={Trash2}
+            title="A lixeira está vazia"
+            description={
+              activeWorkspaceNome
+                ? `Nada foi excluído no workspace ${activeWorkspaceNome}.`
+                : "Arquivos e pastas excluídos ficam aqui por 30 dias, e você pode restaurá-los a qualquer momento."
+            }
+          />
         ) : (
           <div className="space-y-2">
             {filteredPastas.map((pasta) => (

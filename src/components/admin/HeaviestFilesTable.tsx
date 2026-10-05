@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes } from "@/lib/utils";
 import { useHeaviestFiles } from "@/hooks/useAdminAnalytics";
+import { EmptyState } from "@/components/EmptyState";
 
 export function HeaviestFilesTable() {
   const { data, isLoading } = useHeaviestFiles(20);
@@ -22,9 +23,7 @@ export function HeaviestFilesTable() {
           ))}
         </div>
       ) : files.length === 0 ? (
-        <div className="h-32 flex items-center justify-center text-sm text-muted-foreground">
-          Nenhum arquivo encontrado
-        </div>
+        <EmptyState size="compact" icon={HardDrive} title="Nenhum arquivo enviado ainda" />
       ) : (
         <div className="overflow-x-auto">
           <Table>

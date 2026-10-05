@@ -16,7 +16,9 @@ import {
   Film,
   Music,
   Loader2,
+  FolderOpen,
 } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 
 interface PublicArquivo {
   id: string;
@@ -224,10 +226,11 @@ const PublicSharePage = () => {
                 })}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <FileX className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                <p className="text-sm">Nenhum arquivo nesta pasta</p>
-              </div>
+              <EmptyState
+                icon={FolderOpen}
+                title="Nenhum arquivo nesta pasta"
+                description="Quem compartilhou ainda não adicionou arquivos aqui."
+              />
             )}
           </>
         ) : null}

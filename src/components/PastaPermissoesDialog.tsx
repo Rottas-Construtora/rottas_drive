@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Search, BadgeCheck, Network } from "lucide-react";
+import { Shield, Search, BadgeCheck, Network, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { Pasta } from "@/hooks/usePastas";
 import {
@@ -36,6 +36,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getWorkspaceIcon } from "@/components/workspaceIcons";
 import { PastaWorkspacesTab } from "@/components/PastaWorkspacesTab";
+import { EmptyState } from "@/components/EmptyState";
 
 interface PastaPermissoesDialogProps {
   open: boolean;
@@ -300,9 +301,7 @@ export function PastaPermissoesDialog({
                   </div>
                 ))
               ) : (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  Nenhum membro encontrado
-                </p>
+                <EmptyState size="compact" icon={Users} title="Nenhum membro encontrado" />
               )}
             </div>
 

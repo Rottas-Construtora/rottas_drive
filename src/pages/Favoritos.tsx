@@ -10,7 +10,9 @@ import { ArquivoItemSkeleton } from "@/components/skeletons/ArquivoItemSkeleton"
 import { AnimatedMasonry, MasonryItem } from "@/components/AnimatedMasonry";
 import { FileViewer } from "@/components/FileViewer";
 import { Arquivo } from "@/hooks/useArquivos";
-import { Star, Columns3, LayoutGrid, List } from "lucide-react";
+import { Star, Columns3, LayoutGrid, List, SearchX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type ArquivoComObras = Arquivo & {
@@ -107,12 +109,21 @@ export default function Favoritos() {
               ))}
             </div>
           ) : filteredArquivos.length === 0 ? (
-            <div className="text-center py-12">
-              <Star className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">
-                {searchValue ? "Nenhum favorito encontrado" : "Você ainda não tem arquivos favoritos"}
-              </p>
-            </div>
+            searchValue ? (
+              <EmptyState
+                icon={SearchX}
+                title="Nenhum favorito encontrado"
+                description={`Nenhum favorito com "${searchValue}" no nome.`}
+              >
+                <Button variant="outline" onClick={() => setSearchValue("")}>Limpar busca</Button>
+              </EmptyState>
+            ) : (
+              <EmptyState
+                icon={Star}
+                title="Nenhum favorito ainda"
+                description="Marque um arquivo com a estrela para encontrá-lo rápido aqui."
+              />
+            )
           ) : viewMode === "masonry" ? (
             <AnimatedMasonry>
               {filteredArquivos.map((arquivo, index) => (

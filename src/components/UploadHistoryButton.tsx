@@ -12,6 +12,7 @@ import { CheckCircle2, AlertCircle, FileText, Loader2 } from "lucide-react";
 import { formatBytes } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { EmptyState } from "@/components/EmptyState";
 
 export function UploadHistoryButton() {
     const { uploads, setIsOpen } = useUpload();
@@ -108,9 +109,7 @@ export function UploadHistoryButton() {
                             ))}
                         </div>
                     ) : !recentUploads || recentUploads.length === 0 ? (
-                        <div className="p-6 text-center text-sm text-muted-foreground">
-                            Nenhum upload nas últimas 24h
-                        </div>
+                        <EmptyState size="compact" icon={Upload} title="Nenhum upload nas últimas 24h" />
                     ) : (
                         <div className="divide-y">
                             {recentUploads.map((u) => (

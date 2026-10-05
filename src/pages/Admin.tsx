@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle } from
 "@/components/ui/alert-dialog";
-import { Shield, Users, UserPlus, Crown, Edit, Eye, Ban, UserCheck, BarChart3, FolderKanban, Upload } from "lucide-react";
+import { Users, UserPlus, Crown, Edit, Eye, Ban, UserCheck, BarChart3, FolderKanban, Upload } from "lucide-react";
 import { WorkspacesAdminTab } from "@/components/admin/WorkspacesAdminTab";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -36,6 +36,7 @@ import { AdminUploadsTab } from "@/components/admin/AdminUploadsTab";
 import { TopFoldersChart } from "@/components/admin/TopFoldersChart";
 import { HeaviestFilesTable } from "@/components/admin/HeaviestFilesTable";
 import { CargoSetorDatalists } from "@/components/CargoSetorDatalists";
+import { EmptyState } from "@/components/EmptyState";
 
 const roleLabels: Record<string, {label: string;icon: typeof Crown;color: string;}> = {
   admin: { label: "Administrador", icon: Crown, color: "bg-amber-500" },
@@ -162,26 +163,9 @@ const Admin = () => {
 
 
       <div className="flex-1 overflow-auto p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Shield className="h-6 w-6 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-              <p className="text-muted-foreground text-sm">
-                Gerencie usuários, permissões e acompanhe as métricas do sistema
-              </p>
-            </div>
-          </div>
-          <Button onClick={() => setInviteOpen(true)} className="gap-2 w-full sm:w-auto shrink-0">
-            <UserPlus className="h-4 w-4" />
-            convidar
-          </Button>
-        </div>
-
         <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList className="mb-6 grid grid-cols-2 gap-1 h-auto w-full sm:inline-flex sm:h-10 sm:w-auto sm:gap-0">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <TabsList className="grid grid-cols-2 gap-1 h-auto w-full sm:inline-flex sm:h-10 sm:w-auto sm:gap-0">
             <TabsTrigger value="usuarios" className="gap-2">
               <Users className="h-4 w-4" />
               Usuários
@@ -199,6 +183,11 @@ const Admin = () => {
               Métricas
             </TabsTrigger>
           </TabsList>
+            <Button onClick={() => setInviteOpen(true)} className="gap-2 w-full sm:w-auto shrink-0">
+              <UserPlus className="h-4 w-4" />
+              Convidar
+            </Button>
+          </div>
 
           {/* ===================== ABA USUÁRIOS ===================== */}
           <TabsContent value="usuarios" className="mt-0 space-y-6">
@@ -499,10 +488,11 @@ const Admin = () => {
                   </TableBody>
                 </Table> :
 
-              <div className="p-8 text-center">
-                  <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Nenhum usuário encontrado</p>
-                </div>
+              <EmptyState
+                  icon={Users}
+                  title="Nenhum usuário encontrado"
+                  description="Ajuste os filtros ou convide alguém para o Drive."
+                />
               }
             </div>
           </TabsContent>

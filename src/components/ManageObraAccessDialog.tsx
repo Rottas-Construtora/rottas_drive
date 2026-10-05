@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Obra } from "@/hooks/useObras";
+import { EmptyState } from "@/components/EmptyState";
 
 interface ManageObraAccessDialogProps {
   open: boolean;
@@ -153,10 +154,12 @@ export function ManageObraAccessDialog({ open, onOpenChange, obra }: ManageObraA
               </div>
             ))
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="mx-auto h-10 w-10 mb-2 opacity-50" />
-              <p className="text-sm">Nenhum visualizador cadastrado</p>
-            </div>
+            <EmptyState
+              size="compact"
+              icon={Users}
+              title="Nenhum visualizador cadastrado"
+              description="Visualizadores aparecem aqui depois de convidados."
+            />
           )}
         </div>
       </DialogContent>

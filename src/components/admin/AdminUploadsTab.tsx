@@ -33,6 +33,7 @@ import { formatBytes, cn } from "@/lib/utils";
 import { useAdminUploadsList } from "@/hooks/useAdminUploadsList";
 import { useWorkspaces } from "@/hooks/useWorkspaces";
 import { useAdminUsers } from "@/hooks/useAdminUsers";
+import { EmptyState } from "@/components/EmptyState";
 
 const TIPO_PRESETS = [
   { label: "Todos", value: "all", prefix: null as string | null },
@@ -241,9 +242,12 @@ export function AdminUploadsTab() {
             ))}
           </div>
         ) : total === 0 ? (
-          <div className="h-32 flex items-center justify-center text-sm text-muted-foreground">
-            Nenhum upload no período selecionado
-          </div>
+          <EmptyState
+            size="compact"
+            icon={UploadIcon}
+            title="Nenhum upload no período"
+            description="Escolha um período maior para ver mais envios."
+          />
         ) : (
           <div className="overflow-x-auto">
             <Table>

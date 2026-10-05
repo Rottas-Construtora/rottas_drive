@@ -8,6 +8,7 @@ import { Users, Search, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useWorkspaceMembros, useToggleWorkspaceMembro } from "@/hooks/useWorkspaces";
 import { cn, distinctValues } from "@/lib/utils";
+import { EmptyState } from "@/components/EmptyState";
 
 const TODOS = "__todos__";
 const norm = (v: string | null) => (v ?? "").trim().toLowerCase();
@@ -138,10 +139,7 @@ export function WorkspaceMembrosLista({ workspaceId, enabled = true }: Workspace
             </label>
           ))
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <Users className="mx-auto h-10 w-10 mb-2 opacity-50" />
-            <p className="text-sm">Nenhum usuário encontrado</p>
-          </div>
+          <EmptyState size="compact" icon={Users} title="Nenhum usuário encontrado" />
         )}
       </div>
     </div>

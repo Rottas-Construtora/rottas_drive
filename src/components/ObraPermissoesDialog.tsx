@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, Search, BadgeCheck } from "lucide-react";
+import { Shield, Search, BadgeCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { Obra } from "@/hooks/useObras";
 import { PastaAcao, PASTA_ACOES } from "@/hooks/usePastaPermissoes";
@@ -20,6 +20,7 @@ import {
   useObraPermissoes,
   useSaveObraPermissoes,
 } from "@/hooks/useObraPermissoes";
+import { EmptyState } from "@/components/EmptyState";
 
 interface ObraPermissoesDialogProps {
   open: boolean;
@@ -192,9 +193,7 @@ export function ObraPermissoesDialog({
               </div>
             ))
           ) : (
-            <p className="text-center text-sm text-muted-foreground py-8">
-              Nenhum membro encontrado
-            </p>
+            <EmptyState size="compact" icon={Users} title="Nenhum membro encontrado" />
           )}
         </div>
 

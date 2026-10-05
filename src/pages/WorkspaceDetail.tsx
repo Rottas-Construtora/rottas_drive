@@ -7,7 +7,8 @@ import { ObraCard } from "@/components/ObraCard";
 import { CreateObraDialog } from "@/components/CreateObraDialog";
 import { ObraCardSkeleton } from "@/components/skeletons/ObraCardSkeleton";
 import { AnimatedMasonry, MasonryItem } from "@/components/AnimatedMasonry";
-import { Building2, Plus, ChevronLeft } from "lucide-react";
+import { Building2, Plus, ChevronLeft, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,8 @@ const WorkspaceDetail = () => {
   const filteredObras = obras?.filter(
     (obra) =>
       obra.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
-      obra.endereco?.toLowerCase().includes(searchValue.toLowerCase())
+      obra.endereco?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      obra.codigo.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   if (!wsLoading && !workspace) {
@@ -66,7 +68,10 @@ const WorkspaceDetail = () => {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold truncate">{workspace?.nome || "Workspace"}</h1>
+              <div className="flex items-center gap-2 min-w-0">
+                <h1 className="text-2xl font-bold truncate">{workspace?.nome || "Workspace"}</h1>
+                {workspace?.codigo && <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold tabular-nums text-muted-foreground">{workspace.codigo}</span>}
+              </div>
               <p className="text-muted-foreground text-sm">
                 {obras?.length || 0}{" "}
                 {(obras?.length || 0) === 1 ? "coleção" : "coleções"}
@@ -98,19 +103,32 @@ const WorkspaceDetail = () => {
             ))}
           </AnimatedMasonry>
         ) : (
-          <div className="text-center py-16">
-            <Building2 className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Nenhuma coleção aqui</h2>
-            <p className="text-muted-foreground mb-6">
-              Crie a primeira coleção deste workspace.
-            </p>
-            {canEdit && (
-              <Button onClick={() => setCreateOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Nova Coleção
-              </Button>
-            )}
-          </div>
+          searchValue ? (
+            <EmptyState
+              icon={SearchX}
+              title="Nenhuma coleção encontrada"
+              description={`Nenhuma coleção com "${searchValue}" no nome, código ou endereço.`}
+            >
+              <Button variant="outline" onClick={() => setSearchValue("")}>Limpar busca</Button>
+            </EmptyState>
+          ) : (
+            <EmptyState
+              icon={Building2}
+              title="Nenhuma coleção aqui"
+              description={
+                canEdit
+                  ? "Crie a primeira coleção deste workspace para começar a guardar arquivos."
+                  : "Este workspace ainda não tem coleções."
+              }
+            >
+              {canEdit && (
+                <Button onClick={() => setCreateOpen(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Nova Coleção
+                </Button>
+              )}
+            </EmptyState>
+          )
         )}
       </div>
 

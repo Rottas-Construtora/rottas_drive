@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
+import { BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/EmptyState";
 
 interface ChartCardProps {
   title: string;
@@ -30,9 +32,7 @@ export function ChartCard({
       {isLoading ? (
         <Skeleton className="flex-1 min-h-[260px] w-full" />
       ) : isEmpty ? (
-        <div className="flex-1 min-h-[260px] flex items-center justify-center text-sm text-muted-foreground">
-          {emptyLabel}
-        </div>
+        <EmptyState size="compact" icon={BarChart3} title={emptyLabel} className="flex-1 min-h-[260px]" />
       ) : (
         <div className="flex-1 min-h-[260px]">{children}</div>
       )}

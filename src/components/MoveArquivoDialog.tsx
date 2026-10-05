@@ -11,8 +11,9 @@ import {
 import { useAllPastas, Pasta } from "@/hooks/usePastas";
 import { useMoveArquivo } from "@/hooks/useArquivos";
 import { toast } from "sonner";
-import { Folder, Home, ChevronRight, ChevronDown } from "lucide-react";
+import { Folder, FolderOpen, Home, ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/EmptyState";
 
 interface MoveArquivoDialogProps {
   open: boolean;
@@ -146,9 +147,12 @@ export function MoveArquivoDialog({
           ))}
 
           {allPastas?.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Nenhuma pasta disponível
-            </p>
+            <EmptyState
+              size="compact"
+              icon={FolderOpen}
+              title="Nenhuma pasta disponível"
+              description="Crie uma pasta nesta coleção para mover o arquivo."
+            />
           )}
         </div>
         <DialogFooter>

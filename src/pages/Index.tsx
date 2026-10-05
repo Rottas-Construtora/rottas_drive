@@ -12,6 +12,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Button } from "@/components/ui/button";
 import { TutorialPopup } from "@/components/TutorialPopup";
+import { EmptyState } from "@/components/EmptyState";
 
 const Index = () => {
   const { data: workspaces, isLoading } = useWorkspaces();
@@ -23,7 +24,8 @@ const Index = () => {
   const isSearchActive = searchValue.length >= 2;
 
   const filteredWorkspaces = workspaces?.filter((w) =>
-    w.nome.toLowerCase().includes(searchValue.toLowerCase())
+    w.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
+    w.codigo.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   return (
@@ -71,21 +73,22 @@ const Index = () => {
                 ))}
               </AnimatedMasonry>
             ) : (
-              <div className="text-center py-16">
-                <FolderKanban className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Nenhum workspace disponível</h2>
-                <p className="text-muted-foreground mb-6">
-                  {isAdmin
+              <EmptyState
+                icon={FolderKanban}
+                title="Nenhum workspace disponível"
+                description={
+                  isAdmin
                     ? "Crie o primeiro workspace para organizar as coleções por setor."
-                    : "Você ainda não faz parte de nenhum workspace. Fale com um administrador."}
-                </p>
+                    : "Você ainda não faz parte de nenhum workspace. Fale com um administrador."
+                }
+              >
                 {isAdmin && (
                   <Button onClick={() => setCreateOpen(true)} className="gap-2">
                     <Plus className="h-4 w-4" />
                     Novo Workspace
                   </Button>
                 )}
-              </div>
+              </EmptyState>
             )}
           </>
         )}

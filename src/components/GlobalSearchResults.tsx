@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FileText, Image, File, Folder, Building2 } from "lucide-react";
+import { FileText, Image, File, Folder, Building2, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { SearchResult } from "@/hooks/useGlobalSearch";
 import { FileViewer } from "./FileViewer";
 import { SearchResultSkeleton } from "./skeletons/SearchResultSkeleton";
@@ -60,13 +61,11 @@ export function GlobalSearchResults({ results, isLoading, searchTerm }: GlobalSe
 
   if (results.length === 0) {
     return (
-      <div className="text-center py-12">
-        <File className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <h2 className="text-lg font-semibold mb-2">Nenhum arquivo encontrado</h2>
-        <p className="text-muted-foreground">
-          Não encontramos arquivos com "{searchTerm}"
-        </p>
-      </div>
+      <EmptyState
+        icon={SearchX}
+        title="Nenhum arquivo encontrado"
+        description={`Nenhum arquivo com "${searchTerm}" no nome. Confira a grafia ou tente um termo mais curto.`}
+      />
     );
   }
 

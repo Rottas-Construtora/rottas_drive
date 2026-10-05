@@ -21,6 +21,7 @@ import {
 import { CreateWorkspaceDialog } from "@/components/CreateWorkspaceDialog";
 import { EditWorkspaceDialog } from "@/components/EditWorkspaceDialog";
 import { getWorkspaceIcon } from "@/components/workspaceIcons";
+import { EmptyState } from "@/components/EmptyState";
 
 export function WorkspacesAdminTab() {
   const { data: workspaces, isLoading } = useWorkspaces();
@@ -101,10 +102,16 @@ export function WorkspacesAdminTab() {
             );
           })
         ) : (
-          <div className="p-8 text-center">
-            <FolderKanban className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Nenhum workspace cadastrado</p>
-          </div>
+          <EmptyState
+            icon={FolderKanban}
+            title="Nenhum workspace cadastrado"
+            description="Workspaces agrupam as coleções por setor."
+          >
+            <Button onClick={() => setCreateOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Workspace
+            </Button>
+          </EmptyState>
         )}
       </div>
 
