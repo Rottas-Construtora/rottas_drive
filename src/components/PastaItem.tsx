@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Trash2, Palette, FileText, Shield, Share2, Sparkles, Network } from "lucide-react";
+import { Trash2, Palette, FileText, Shield, Share2, Network } from "lucide-react";
 import { PastaPermissoesDialog } from "@/components/PastaPermissoesDialog";
 import { CompartilharPastaDialog } from "@/components/CompartilharPastaDialog";
 import { Pasta, PastaColor, useDeletePasta, useUpdatePastaColor } from "@/hooks/usePastas";
@@ -163,22 +163,6 @@ export function PastaItem({ pasta, vinculoCount = 0 }: PastaItemProps) {
           </PopoverContent>
         </Popover>
 
-        {/* Indexar para o chat — Em breve */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-full bg-card border border-border shadow-sm hover:bg-primary/10 hover:text-primary"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            toast.info("Em breve", {
-              description: "Chat IA em desenvolvimento — disponível em breve.",
-            });
-          }}
-          title="Chat IA — em breve"
-        >
-          <Sparkles className="h-4 w-4" />
-        </Button>
 
         {/* Compartilhar */}
         <Button
