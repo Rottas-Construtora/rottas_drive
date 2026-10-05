@@ -155,6 +155,24 @@ serve(async (req: Request) => {
       if (profileError) console.error("Error setting cargo/setor:", profileError.message);
     }
 
+    // Workspaces escolhidos pelo admin no convite (sem isso o usuário entra sem ver nada)
+    if (invite.workspace_ids?.length) {
+      // Só os que ainda existem (um workspace pode ter sido excluído depois do convite)
+      const { data: existentes } = await supabaseAdmin
+        .from("workspaces")
+        .select("id")
+        .in("id", invite.workspace_ids);
+      if (existentes?.length) {
+        const { error: membrosError } = await supabaseAdmin
+          .from("workspace_membros")
+          .upsert(
+            existentes.map((w: { id: string }) => ({ workspace_id: w.id, user_id: userData.user!.id })),
+            { onConflict: "workspace_id,user_id", ignoreDuplicates: true }
+          );
+        if (membrosError) console.error("Error adding workspace membros:", membrosError.message);
+      }
+    }
+
     // Assign viewer role to new user
     const { error: roleError } = await supabaseAdmin
       .from("user_roles")

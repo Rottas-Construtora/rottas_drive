@@ -6,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Mail, Send, Copy, Check, Link, Briefcase, Building2 } from "lucide-react";
+import { Mail, Send, Copy, Check, Link, Briefcase, Building2, FolderKanban } from "lucide-react";
 import { CargoSetorDatalists } from "@/components/CargoSetorDatalists";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useWorkspaces } from "@/hooks/useWorkspaces";
+import { getWorkspaceIcon } from "@/components/workspaceIcons";
 
 interface InviteUserDialogProps {
   open: boolean;
@@ -19,6 +22,8 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
   const [email, setEmail] = useState("");
   const [cargo, setCargo] = useState("");
   const [setor, setSetor] = useState("");
+  const [workspaceIds, setWorkspaceIds] = useState<string[]>([]);
+  const { data: workspaces } = useWorkspaces();
   const [loading, setLoading] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -28,6 +33,11 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
 
     if (!email.trim()) {
       toast.error("Email é obrigatório");
+      return;
+    }
+
+    if (workspaceIds.length === 0) {
+      toast.error("Escolha pelo menos um workspace");
       return;
     }
 
@@ -42,6 +52,7 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
           invited_by: user?.id,
           cargo: cargo.trim() || null,
           setor: setor.trim() || null,
+          workspace_ids: workspaceIds,
         })
         .select()
         .single();
@@ -68,6 +79,7 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
           setEmail("");
           setCargo("");
           setSetor("");
+          setWorkspaceIds([]);
           onOpenChange(false);
         }
       } catch {
@@ -96,6 +108,7 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
       setEmail("");
       setCargo("");
       setSetor("");
+      setWorkspaceIds([]);
     }
     onOpenChange(value);
   };
@@ -156,6 +169,41 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
                 onChange={(e) => setSetor(e.target.value)}
                 disabled={!!inviteLink}
               />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <FolderKanban className="h-4 w-4" />
+              Workspaces
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              O usuário só vê as coleções dos workspaces marcados.
+            </p>
+            <div className="max-h-48 overflow-y-auto rounded-lg border divide-y">
+              {(workspaces ?? []).map((ws) => {
+                const Icon = getWorkspaceIcon(ws.icone);
+                const accent = ws.cor || "hsl(var(--primary))";
+                return (
+                  <label
+                    key={ws.id}
+                    className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-muted/50"
+                  >
+                    <Checkbox
+                      checked={workspaceIds.includes(ws.id)}
+                      disabled={!!inviteLink}
+                      onCheckedChange={(checked) =>
+                        setWorkspaceIds((prev) =>
+                          checked ? [...prev, ws.id] : prev.filter((id) => id !== ws.id)
+                        )
+                      }
+                    />
+                    <Icon className="h-4 w-4 shrink-0" style={{ color: accent }} />
+                    <span className="text-sm truncate flex-1">{ws.nome}</span>
+                    <span className="text-xs font-semibold tabular-nums text-muted-foreground">{ws.codigo}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
