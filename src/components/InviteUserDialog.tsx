@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Mail, Send, Copy, Check, Link } from "lucide-react";
+import { Mail, Send, Copy, Check, Link, Briefcase, Building2 } from "lucide-react";
+import { CargoSetorDatalists } from "@/components/CargoSetorDatalists";
 
 interface InviteUserDialogProps {
   open: boolean;
@@ -16,6 +17,8 @@ interface InviteUserDialogProps {
 export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) => {
   const { user } = useAuth();
   const [email, setEmail] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [setor, setSetor] = useState("");
   const [loading, setLoading] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -37,6 +40,8 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
         .insert({
           email: email.trim(),
           invited_by: user?.id,
+          cargo: cargo.trim() || null,
+          setor: setor.trim() || null,
         })
         .select()
         .single();
@@ -61,6 +66,8 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
         } else {
           toast.success("Convite enviado por email com sucesso!");
           setEmail("");
+          setCargo("");
+          setSetor("");
           onOpenChange(false);
         }
       } catch {
@@ -87,6 +94,8 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
       setInviteLink(null);
       setCopied(false);
       setEmail("");
+      setCargo("");
+      setSetor("");
     }
     onOpenChange(value);
   };
@@ -116,6 +125,38 @@ export const InviteUserDialog = ({ open, onOpenChange }: InviteUserDialogProps) 
               required
               disabled={!!inviteLink}
             />
+          </div>
+
+          <CargoSetorDatalists />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="invite-cargo" className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                Cargo
+              </Label>
+              <Input
+                id="invite-cargo"
+                list="cargo-options"
+                placeholder="Ex.: Engenheiro Civil"
+                value={cargo}
+                onChange={(e) => setCargo(e.target.value)}
+                disabled={!!inviteLink}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-setor" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Setor
+              </Label>
+              <Input
+                id="invite-setor"
+                list="setor-options"
+                placeholder="Ex.: Engenharia"
+                value={setor}
+                onChange={(e) => setSetor(e.target.value)}
+                disabled={!!inviteLink}
+              />
+            </div>
           </div>
 
           {!inviteLink && (

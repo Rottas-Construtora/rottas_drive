@@ -146,6 +146,15 @@ serve(async (req: Request) => {
       );
     }
 
+    // Cargo/setor definidos pelo admin no convite (o perfil já foi criado pelo trigger handle_new_user)
+    if (invite.cargo || invite.setor) {
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .update({ cargo: invite.cargo, setor: invite.setor })
+        .eq("user_id", userData.user!.id);
+      if (profileError) console.error("Error setting cargo/setor:", profileError.message);
+    }
+
     // Assign viewer role to new user
     const { error: roleError } = await supabaseAdmin
       .from("user_roles")

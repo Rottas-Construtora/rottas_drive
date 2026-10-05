@@ -8,6 +8,7 @@ export interface Profile {
   nome: string | null;
   avatar_url: string | null;
   cargo: string | null;
+  setor: string | null;
   created_at: string;
   updated_at: string;
 }

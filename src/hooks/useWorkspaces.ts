@@ -138,6 +138,7 @@ export interface WorkspaceMemberRow {
   user_id: string;
   nome: string | null;
   cargo: string | null;
+  setor: string | null;
   avatar_url: string | null;
   is_member: boolean;
   is_gestor: boolean;
@@ -155,7 +156,7 @@ export function useWorkspaceMembros(workspaceId: string | undefined, enabled = t
     queryFn: async () => {
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, nome, cargo, avatar_url");
+        .select("user_id, nome, cargo, setor, avatar_url");
       if (profilesError) throw profilesError;
 
       const { data: roles, error: rolesError } = await supabase
@@ -184,6 +185,7 @@ export function useWorkspaceMembros(workspaceId: string | undefined, enabled = t
           user_id: p.user_id,
           nome: p.nome,
           cargo: p.cargo ?? null,
+          setor: p.setor ?? null,
           avatar_url: p.avatar_url,
           is_member: memberIds.has(p.user_id),
           is_gestor: gestorRole !== null,

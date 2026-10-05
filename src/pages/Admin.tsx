@@ -35,6 +35,7 @@ import { UploadsByWeekChart } from "@/components/admin/UploadsByWeekChart";
 import { AdminUploadsTab } from "@/components/admin/AdminUploadsTab";
 import { TopFoldersChart } from "@/components/admin/TopFoldersChart";
 import { HeaviestFilesTable } from "@/components/admin/HeaviestFilesTable";
+import { CargoSetorDatalists } from "@/components/CargoSetorDatalists";
 
 const roleLabels: Record<string, {label: string;icon: typeof Crown;color: string;}> = {
   admin: { label: "Administrador", icon: Crown, color: "bg-amber-500" },
@@ -43,18 +44,21 @@ const roleLabels: Record<string, {label: string;icon: typeof Crown;color: string
   user: { label: "Usuário", icon: Eye, color: "bg-gray-500" }
 };
 
-const CargoCell = ({
-  userId,
-  cargo,
+/** Input editável inline (salva no blur) para cargo/setor do usuário. */
+const PerfilTextCell = ({
+  value: initial,
   onSave,
+  placeholder,
+  list,
   disabled,
 }: {
-  userId: string;
-  cargo: string | null;
-  onSave: (userId: string, cargo: string | null) => void;
+  value: string | null;
+  onSave: (value: string | null) => void;
+  placeholder: string;
+  list: string;
   disabled?: boolean;
 }) => {
-  const [value, setValue] = useState(cargo ?? "");
+  const [value, setValue] = useState(initial ?? "");
 
   return (
     <Input
@@ -62,11 +66,12 @@ const CargoCell = ({
       onChange={(e) => setValue(e.target.value)}
       onBlur={() => {
         const trimmed = value.trim();
-        if (trimmed !== (cargo ?? "")) {
-          onSave(userId, trimmed || null);
+        if (trimmed !== (initial ?? "")) {
+          onSave(trimmed || null);
         }
       }}
-      placeholder="Cargo"
+      placeholder={placeholder}
+      list={list}
       className="h-9 w-44"
       disabled={disabled} />);
 
@@ -74,7 +79,7 @@ const CargoCell = ({
 
 const Admin = () => {
   const { isAdmin, user, loading: authLoading } = useAuthContext();
-  const { users, isLoading, updateUserRole, updateUserCargo, blockUser } = useAdminUsers();
+  const { users, isLoading, updateUserRole, updateUserPerfil, blockUser } = useAdminUsers();
   const [searchValue, setSearchValue] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
@@ -291,6 +296,7 @@ const Admin = () => {
 
             {/* Users Table */}
             <div className="bg-card border border-border rounded-xl">
+              <CargoSetorDatalists />
               <div className="p-4 border-b border-border">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-muted-foreground" />
@@ -304,6 +310,7 @@ const Admin = () => {
                     <TableRow>
                       <TableHead>Usuário</TableHead>
                       <TableHead>Cargo</TableHead>
+                      <TableHead>Setor</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Nível Atual</TableHead>
                       <TableHead>Data de Registro</TableHead>
@@ -322,6 +329,9 @@ const Admin = () => {
                               <Skeleton className="h-3 w-48" />
                             </div>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-9 w-44" />
                         </TableCell>
                         <TableCell>
                           <Skeleton className="h-9 w-44" />
@@ -351,6 +361,7 @@ const Admin = () => {
                     <TableRow>
                       <TableHead>Usuário</TableHead>
                       <TableHead>Cargo</TableHead>
+                      <TableHead>Setor</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Nível Atual</TableHead>
                       <TableHead>Data de Registro</TableHead>
@@ -381,11 +392,21 @@ const Admin = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <CargoCell
-                        userId={userItem.user_id}
-                        cargo={userItem.cargo}
-                        onSave={(userId, cargo) => updateUserCargo.mutate({ userId, cargo })}
-                        disabled={updateUserCargo.isPending} />
+                          <PerfilTextCell
+                        value={userItem.cargo}
+                        placeholder="Cargo"
+                        list="cargo-options"
+                        onSave={(cargo) => updateUserPerfil.mutate({ userId: userItem.user_id, updates: { cargo } })}
+                        disabled={updateUserPerfil.isPending} />
+
+                        </TableCell>
+                        <TableCell>
+                          <PerfilTextCell
+                        value={userItem.setor}
+                        placeholder="Setor"
+                        list="setor-options"
+                        onSave={(setor) => updateUserPerfil.mutate({ userId: userItem.user_id, updates: { setor } })}
+                        disabled={updateUserPerfil.isPending} />
 
                         </TableCell>
                         <TableCell>

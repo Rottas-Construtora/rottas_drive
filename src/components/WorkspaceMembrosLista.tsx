@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Search, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useWorkspaceMembros, useToggleWorkspaceMembro } from "@/hooks/useWorkspaces";
-import { cn } from "@/lib/utils";
+import { cn, distinctValues } from "@/lib/utils";
+
+const TODOS = "__todos__";
+const norm = (v: string | null) => (v ?? "").trim().toLowerCase();
 
 interface WorkspaceMembrosListaProps {
   workspaceId: string;
@@ -17,6 +21,8 @@ interface WorkspaceMembrosListaProps {
 /** Lista de usuários com switch de acesso ao workspace. Reutilizável em qualquer dialog. */
 export function WorkspaceMembrosLista({ workspaceId, enabled = true }: WorkspaceMembrosListaProps) {
   const [search, setSearch] = useState("");
+  const [cargoFiltro, setCargoFiltro] = useState(TODOS);
+  const [setorFiltro, setSetorFiltro] = useState(TODOS);
   const { data: membros, isLoading } = useWorkspaceMembros(workspaceId, enabled);
   const toggle = useToggleWorkspaceMembro();
 
@@ -25,20 +31,55 @@ export function WorkspaceMembrosLista({ workspaceId, enabled = true }: Workspace
     return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
-  const filtered = (membros ?? []).filter((m) =>
-    (m.nome ?? "").toLowerCase().includes(search.toLowerCase())
+  const cargos = useMemo(() => distinctValues((membros ?? []).map((m) => m.cargo)), [membros]);
+  const setores = useMemo(() => distinctValues((membros ?? []).map((m) => m.setor)), [membros]);
+
+  const q = search.trim().toLowerCase();
+  const filtered = (membros ?? []).filter(
+    (m) =>
+      (!q || [m.nome, m.cargo, m.setor].some((v) => norm(v).includes(q))) &&
+      (cargoFiltro === TODOS || norm(m.cargo) === norm(cargoFiltro)) &&
+      (setorFiltro === TODOS || norm(m.setor) === norm(setorFiltro))
   );
 
   return (
     <div className="space-y-2">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar membro..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar nome, cargo ou setor..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {cargos.length > 0 && (
+          <Select value={cargoFiltro} onValueChange={setCargoFiltro}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TODOS}>Todos os cargos</SelectItem>
+              {cargos.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {setores.length > 0 && (
+          <Select value={setorFiltro} onValueChange={setSetorFiltro}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TODOS}>Todos os setores</SelectItem>
+              {setores.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <div className="space-y-1 max-h-64 overflow-auto">
@@ -73,7 +114,11 @@ export function WorkspaceMembrosLista({ workspaceId, enabled = true }: Workspace
                     {m.gestor_role === "admin" ? "Admin" : "Editor"} (acesso total)
                   </p>
                 ) : (
-                  m.cargo && <p className="text-xs text-muted-foreground truncate">{m.cargo}</p>
+                  (m.cargo || m.setor) && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {[m.cargo, m.setor].filter(Boolean).join(" · ")}
+                    </p>
+                  )
                 )}
               </div>
               <Checkbox

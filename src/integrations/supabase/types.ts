@@ -312,6 +312,8 @@ export type Database = {
           expires_at: string
           id: string
           invited_by: string | null
+          cargo: string | null
+          setor: string | null
           status: string
           token: string
         }
@@ -321,6 +323,8 @@ export type Database = {
           expires_at?: string
           id?: string
           invited_by?: string | null
+          cargo?: string | null
+          setor?: string | null
           status?: string
           token?: string
         }
@@ -330,6 +334,8 @@ export type Database = {
           expires_at?: string
           id?: string
           invited_by?: string | null
+          cargo?: string | null
+          setor?: string | null
           status?: string
           token?: string
         }
@@ -642,6 +648,7 @@ export type Database = {
           created_at: string
           id: string
           nome: string | null
+          setor: string | null
           updated_at: string
           user_id: string
         }
@@ -651,6 +658,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string | null
+          setor?: string | null
           updated_at?: string
           user_id: string
         }
@@ -660,6 +668,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string | null
+          setor?: string | null
           updated_at?: string
           user_id?: string
         }
