@@ -144,7 +144,7 @@ export function FileViewer({ arquivo, open, onOpenChange, arquivos = [], onNavig
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-full max-h-[90vh] flex flex-col p-0 gap-0">
+      <DialogContent className="sm:max-w-5xl w-full max-h-[90vh] flex flex-col p-0 gap-0">
         <DialogHeader className="flex flex-row items-center justify-between p-4 border-b pr-12">
           <DialogTitle className="truncate pr-4">{arquivo.nome}</DialogTitle>
           <div className="flex items-center gap-1">
