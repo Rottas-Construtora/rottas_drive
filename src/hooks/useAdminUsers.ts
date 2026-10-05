@@ -8,6 +8,7 @@ export interface UserWithProfile {
   nome: string | null;
   avatar_url: string | null;
   cargo: string | null;
+  setor: string | null;
   created_at: string;
   role: AppRole;
   email?: string;
@@ -57,6 +58,7 @@ export const useAdminUsers = () => {
           nome: profile.nome,
           avatar_url: profile.avatar_url,
           cargo: profile.cargo ?? null,
+          setor: profile.setor ?? null,
           created_at: profile.created_at,
           role,
           is_blocked: blockedUserIds.has(profile.user_id),
@@ -86,21 +88,27 @@ export const useAdminUsers = () => {
     },
   });
 
-  const updateUserCargo = useMutation({
-    mutationFn: async ({ userId, cargo }: { userId: string; cargo: string | null }) => {
+  const updateUserPerfil = useMutation({
+    mutationFn: async ({
+      userId,
+      updates,
+    }: {
+      userId: string;
+      updates: { cargo?: string | null; setor?: string | null };
+    }) => {
       const { error } = await supabase
         .from("profiles")
-        .update({ cargo })
+        .update(updates)
         .eq("user_id", userId);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast.success("Cargo atualizado!");
+      toast.success("Perfil atualizado!");
     },
     onError: (error: any) => {
-      toast.error("Erro ao atualizar cargo: " + error.message);
+      toast.error("Erro ao atualizar perfil: " + error.message);
     },
   });
 
@@ -136,7 +144,7 @@ export const useAdminUsers = () => {
     isLoading,
     error,
     updateUserRole,
-    updateUserCargo,
+    updateUserPerfil,
     blockUser,
   };
 };

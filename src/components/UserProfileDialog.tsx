@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, LogOut, User, Calendar, Briefcase } from "lucide-react";
+import { Camera, LogOut, User, Calendar, Briefcase, Building2 } from "lucide-react";
+import { CargoSetorDatalists } from "@/components/CargoSetorDatalists";
 import { toast } from "sonner";
 import { useAuthContext } from "@/components/AuthProvider";
 import { format } from "date-fns";
@@ -22,12 +23,14 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
 
   const [nome, setNome] = useState("");
   const [cargo, setCargo] = useState("");
+  const [setor, setSetor] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setNome(profile.nome || "");
       setCargo(profile.cargo || "");
+      setSetor(profile.setor || "");
     }
   }, [profile, user]);
 
@@ -66,7 +69,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
     }
 
     setLoading(true);
-    const { error } = await updateProfile({ nome, cargo: cargo.trim() || null });
+    const { error } = await updateProfile({ nome, cargo: cargo.trim() || null, setor: setor.trim() || null });
     if (error) {
       toast.error("Erro ao atualizar perfil: " + error.message);
     } else {
@@ -144,23 +147,37 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
           />
         </div>
 
-        {/* Cargo */}
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2">
-            <Briefcase className="h-4 w-4" />
-            Cargo
-          </Label>
-          <div className="flex gap-2">
+        {/* Cargo e setor */}
+        <CargoSetorDatalists />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              Cargo
+            </Label>
             <Input
+              list="cargo-options"
               value={cargo}
               onChange={(e) => setCargo(e.target.value)}
               placeholder="Ex.: Engenheiro Civil"
             />
-            <Button onClick={handleUpdateProfile} disabled={loading} size="sm">
-              Salvar
-            </Button>
+          </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Setor
+            </Label>
+            <Input
+              list="setor-options"
+              value={setor}
+              onChange={(e) => setSetor(e.target.value)}
+              placeholder="Ex.: Engenharia"
+            />
           </div>
         </div>
+        <Button onClick={handleUpdateProfile} disabled={loading} size="sm" className="w-full">
+          Salvar
+        </Button>
 
         <Separator />
 
