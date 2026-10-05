@@ -24,7 +24,7 @@ import { AnimatedMasonry, MasonryItem } from "@/components/AnimatedMasonry";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ChevronLeft, Home, ChevronRight, Folder, FileX, LayoutGrid, List, MapPin, Pencil, Building2, Columns3, Sparkles, Loader2 } from "lucide-react";
+import { ChevronLeft, Home, ChevronRight, Folder, FileX, LayoutGrid, List, MapPin, Pencil, Building2, Columns3, Loader2 } from "lucide-react";
 import type { Obra } from "@/hooks/useObras";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -187,25 +187,6 @@ const ObraDetail = () => {
                     onClick={() => setEditObraOpen(true)}
                   >
                     <Pencil className="h-4 w-4" />
-                  </Button>
-                )}
-                {canEdit && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      toast.info("Em breve", {
-                        description: "Chat IA em desenvolvimento — disponível em breve.",
-                      })
-                    }
-                    className="gap-2 border-primary/30 text-primary hover:bg-primary/10"
-                    title="Chat IA — em breve"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Indexar para o chat
-                    <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold">
-                      Em breve
-                    </span>
                   </Button>
                 )}
               </div>

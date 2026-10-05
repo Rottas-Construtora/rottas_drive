@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ChatWidget from "@/components/chat/ChatWidget";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -18,7 +17,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         {children}
       </main>
       {isMobile && <MobileBottomNav />}
-      {!isMobile && <ChatWidget />}
     </div>
   );
 }
