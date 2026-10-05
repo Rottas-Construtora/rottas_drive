@@ -32,7 +32,7 @@ export function MobileBottomNav() {
               to={item.url}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground"
+                isActive ? "text-gray-700" : "text-muted-foreground"
               )}
             >
               <item.icon 

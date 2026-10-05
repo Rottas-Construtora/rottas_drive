@@ -1,9 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
-import { Building2, Star, User, ChevronLeft, ChevronRight, Trash2, Shield } from "lucide-react";
-import logo from "@/assets/logo.png";
-import { cn } from "@/lib/utils";
+import { Building2, Star, User, Trash2, Shield } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import { StorageGauge } from "@/components/StorageGauge";
-import { useState } from "react";
 import { useAuthContext } from "@/components/AuthProvider";
 
 const baseMenuItems = [
@@ -15,68 +22,67 @@ const baseMenuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
   const { isAdmin } = useAuthContext();
 
-  // Add admin menu item only for admins
-  const menuItems = isAdmin 
+  const menuItems = isAdmin
     ? [...baseMenuItems.slice(0, 3), { title: "Admin", url: "/admin", icon: Shield }, baseMenuItems[3]]
     : baseMenuItems;
 
   return (
-    <aside 
-      className={cn(
-        "sticky top-0 h-screen bg-card border-r border-border flex flex-col transition-all duration-300",
-        collapsed ? "w-20" : "w-64"
-      )}
-    >
-      {/* Toggle Button */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-8 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card shadow-sm hover:bg-muted transition-colors"
-      >
-        {collapsed ? (
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        ) : (
-          <ChevronLeft className="h-4 w-4 text-muted-foreground" />
-        )}
-      </button>
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="px-2 py-4 group-data-[collapsible=icon]:!px-0">
+        <div className="flex items-center gap-3 overflow-hidden justify-center">
+          <img
+            src="/Brand/rottas_logo_laranja.png"
+            alt="Rottas"
+            className="h-7 w-7 object-contain shrink-0 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6"
+          />
+          <span
+            className="text-base font-bold tracking-tight truncate group-data-[collapsible=icon]:hidden"
+            style={{ color: "#979798" }}
+          >
+            Rottas Drive
+          </span>
+        </div>
+      </SidebarHeader>
 
-      <div className={cn("p-6 flex items-center gap-3", collapsed && "justify-center")}>
-        <img src={logo} alt="Logo" className="w-10 h-10 object-contain aspect-square" />
-        {!collapsed && <span className="font-bold text-lg">Rottas</span>}
-      </div>
+      <SidebarContent className="pt-2">
+        <SidebarGroup className="group-data-[collapsible=icon]:!px-0">
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-0.5 px-2 group-data-[collapsible=icon]:!px-0">
+              {menuItems.map((item) => {
+                const isActive =
+                  location.pathname === item.url ||
+                  (item.url === "/home" && location.pathname === "/") ||
+                  (item.url !== "/home" && location.pathname.startsWith(item.url));
 
-      <nav className="flex-1 overflow-y-auto px-4 py-6">
-        <ul className="space-y-1">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.url ||
-              (item.url === "/home" && (location.pathname === "/" || location.pathname === "/home")) ||
-              (item.url !== "/home" && location.pathname.startsWith(item.url));
-            
-            return (
-              <li key={item.title}>
-                <Link
-                  to={item.url}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium",
-                    collapsed && "justify-center px-2",
-                    isActive
-                      ? "bg-primary/15 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                  title={collapsed ? item.title : undefined}
-                >
-                  <item.icon className="h-5 w-5 shrink-0" />
-                  {!collapsed && <span>{item.title}</span>}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <Link
+                      to={item.url}
+                      title={item.title}
+                      className={`
+                        flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all min-w-0
+                        group-data-[collapsible=icon]:!w-8 group-data-[collapsible=icon]:!h-8 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:mx-auto
+                        ${isActive
+                          ? "bg-[#EEEFF4] text-gray-700"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"}
+                      `}
+                    >
+                      <item.icon className="h-[18px] w-[18px] shrink-0" />
+                      <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+                    </Link>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      {!collapsed && <StorageGauge />}
-    </aside>
+      <SidebarFooter className="p-0 group-data-[collapsible=icon]:hidden">
+        <StorageGauge />
+      </SidebarFooter>
+    </Sidebar>
   );
 }
