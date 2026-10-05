@@ -27,10 +27,10 @@ AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
 
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content> & { overlayClassName?: string }
+>(({ className, overlayClassName, ...props }, ref) => (
   <AlertDialogPortal>
-    <AlertDialogOverlay />
+    <AlertDialogOverlay className={overlayClassName} />
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
@@ -69,11 +69,18 @@ const AlertDialogDescription = React.forwardRef<
 ));
 AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
 
+/**
+ * Botão de confirmação do diálogo. `variant="destructive"` é OBRIGATÓRIO em qualquer ação que
+ * apaga/remove algo — botão de excluir é sempre vermelho, nunca laranja (o `default` é o primary
+ * laranja e vira "confirmar" de ação normal). Ver docs/design-system/botoes.md.
+ */
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
->(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants(), className)} {...props} />
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action> & {
+    variant?: "default" | "destructive";
+  }
+>(({ className, variant, ...props }, ref) => (
+  <AlertDialogPrimitive.Action ref={ref} className={cn(buttonVariants({ variant }), className)} {...props} />
 ));
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 

@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { FileText, Image, File, Folder, Building2 } from "lucide-react";
+import { FileText, Image, File, Folder, Building2, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { SearchResult } from "@/hooks/useGlobalSearch";
 import { FileViewer } from "./FileViewer";
 import { SearchResultSkeleton } from "./skeletons/SearchResultSkeleton";
 import { useNavigate } from "react-router-dom";
+import { useSignedUrls } from "@/lib/storage";
 
 interface GlobalSearchResultsProps {
   results: SearchResult[];
@@ -29,6 +31,7 @@ export function GlobalSearchResults({ results, isLoading, searchTerm }: GlobalSe
   const navigate = useNavigate();
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<SearchResult | null>(null);
+  const signed = useSignedUrls(results.map((r) => r.arquivo_url));
 
   const handleFileClick = (file: SearchResult) => {
     setSelectedFile(file);
@@ -58,13 +61,11 @@ export function GlobalSearchResults({ results, isLoading, searchTerm }: GlobalSe
 
   if (results.length === 0) {
     return (
-      <div className="text-center py-12">
-        <File className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <h2 className="text-lg font-semibold mb-2">Nenhum arquivo encontrado</h2>
-        <p className="text-muted-foreground">
-          Não encontramos arquivos com "{searchTerm}"
-        </p>
-      </div>
+      <EmptyState
+        icon={SearchX}
+        title="Nenhum arquivo encontrado"
+        description={`Nenhum arquivo com "${searchTerm}" no nome. Confira a grafia ou tente um termo mais curto.`}
+      />
     );
   }
 
@@ -88,9 +89,9 @@ export function GlobalSearchResults({ results, isLoading, searchTerm }: GlobalSe
           >
             {/* File thumbnail or icon */}
             <div className="flex-shrink-0 w-10 h-10 sm:w-[100px] sm:h-[100px] rounded-md sm:rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-              {file.tipo?.startsWith("image/") ? (
+              {file.tipo?.startsWith("image/") && signed.get(file.arquivo_url) ? (
                 <img
-                  src={file.arquivo_url}
+                  src={signed.get(file.arquivo_url) || ""}
                   alt={file.nome}
                   className="w-full h-full object-cover"
                 />

@@ -70,7 +70,25 @@ const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<"span"
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
+/**
+ * Janela de números de página (0-based): ≤ 7 páginas mostra todas; senão
+ * 1, 2, … vizinhas da atual …, penúltima, última. Padrão do design system
+ * (docs/design-system/tabelas.md § Paginação).
+ */
+const pageList = (current: number, total: number): (number | "...")[] => {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+  const pages = new Set([0, 1, current - 1, current, current + 1, total - 2, total - 1]);
+  const sorted = Array.from(pages).filter((p) => p >= 0 && p < total).sort((a, b) => a - b);
+  const out: (number | "...")[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) out.push("...");
+    out.push(sorted[i]);
+  }
+  return out;
+};
+
 export {
+  pageList,
   Pagination,
   PaginationContent,
   PaginationEllipsis,

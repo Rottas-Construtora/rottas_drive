@@ -2,29 +2,49 @@ import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { useFavoritos } from "@/hooks/useFavoritos";
+import { useWorkspaces } from "@/hooks/useWorkspaces";
+import { useAuthContext } from "@/components/AuthProvider";
+import { WorkspaceFilter } from "@/components/WorkspaceFilter";
 import { ArquivoItem } from "@/components/ArquivoItem";
 import { ArquivoItemSkeleton } from "@/components/skeletons/ArquivoItemSkeleton";
 import { AnimatedMasonry, MasonryItem } from "@/components/AnimatedMasonry";
 import { FileViewer } from "@/components/FileViewer";
 import { Arquivo } from "@/hooks/useArquivos";
-import { Star, Columns3, LayoutGrid, List } from "lucide-react";
+import { Star, Columns3, LayoutGrid, List, SearchX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+type ArquivoComObras = Arquivo & {
+  obras?: { workspace_id: string | null } | null;
+};
 
 export default function Favoritos() {
   const [searchValue, setSearchValue] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid" | "masonry">("masonry");
   const [selectedArquivo, setSelectedArquivo] = useState<Arquivo | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [workspaceFilter, setWorkspaceFilter] = useState<string>("all");
 
   const { data: favoritos, isLoading } = useFavoritos();
+  const { data: workspaces } = useWorkspaces();
+  const { isAdmin } = useAuthContext();
 
-  const arquivos = favoritos
-    ?.map((f) => f.arquivos as unknown as Arquivo)
-    .filter(Boolean) || [];
+  const showFilter = isAdmin || (workspaces?.length ?? 0) > 1;
 
-  const filteredArquivos = arquivos.filter((arquivo) =>
-    arquivo.nome.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const arquivos = (favoritos
+    ?.map((f) => f.arquivos as unknown as ArquivoComObras)
+    .filter(Boolean) || []) as ArquivoComObras[];
+
+  const filteredArquivos = arquivos
+    .filter(
+      (a) =>
+        workspaceFilter === "all" ||
+        a.obras?.workspace_id === workspaceFilter
+    )
+    .filter((arquivo) =>
+      arquivo.nome.toLowerCase().includes(searchValue.toLowerCase())
+    );
 
   const handleArquivoClick = (arquivo: Arquivo) => {
     setSelectedArquivo(arquivo);
@@ -47,10 +67,18 @@ export default function Favoritos() {
                 Favoritos
               </h1>
               <p className="text-muted-foreground">
-                {arquivos.length} arquivo{arquivos.length !== 1 ? "s" : ""} favoritado{arquivos.length !== 1 ? "s" : ""}
+                {filteredArquivos.length} arquivo{filteredArquivos.length !== 1 ? "s" : ""} favoritado{filteredArquivos.length !== 1 ? "s" : ""}
               </p>
             </div>
-            <ToggleGroup
+            <div className="flex items-center gap-2">
+              {showFilter && (
+                <WorkspaceFilter
+                  value={workspaceFilter}
+                  onChange={setWorkspaceFilter}
+                  workspaces={workspaces ?? []}
+                />
+              )}
+              <ToggleGroup
               type="single"
               value={viewMode}
               onValueChange={(value) => value && setViewMode(value as "list" | "grid" | "masonry")}
@@ -65,6 +93,7 @@ export default function Favoritos() {
                 <List className="h-4 w-4" />
               </ToggleGroupItem>
             </ToggleGroup>
+            </div>
           </div>
 
           {isLoading ? (
@@ -80,12 +109,21 @@ export default function Favoritos() {
               ))}
             </div>
           ) : filteredArquivos.length === 0 ? (
-            <div className="text-center py-12">
-              <Star className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">
-                {searchValue ? "Nenhum favorito encontrado" : "Você ainda não tem arquivos favoritos"}
-              </p>
-            </div>
+            searchValue ? (
+              <EmptyState
+                icon={SearchX}
+                title="Nenhum favorito encontrado"
+                description={`Nenhum favorito com "${searchValue}" no nome.`}
+              >
+                <Button variant="outline" onClick={() => setSearchValue("")}>Limpar busca</Button>
+              </EmptyState>
+            ) : (
+              <EmptyState
+                icon={Star}
+                title="Nenhum favorito ainda"
+                description="Marque um arquivo com a estrela para encontrá-lo rápido aqui."
+              />
+            )
           ) : viewMode === "masonry" ? (
             <AnimatedMasonry>
               {filteredArquivos.map((arquivo, index) => (

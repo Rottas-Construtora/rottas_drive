@@ -3,8 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 // --- CORS: restrict to known origins ---
 const ALLOWED_ORIGINS = [
-  "https://rottasdrive.lovable.app",
-  "https://id-preview--27012e3a-a587-4fdf-94d2-3d830603f691.lovable.app",
+  "https://drive.rottasconstrutora.com.br",
   "http://localhost:5173",
   "http://localhost:3000",
 ];
@@ -145,6 +144,33 @@ serve(async (req: Request) => {
         JSON.stringify({ error: "Erro ao criar conta. Tente novamente." }),
         { status: 400, headers: { "Content-Type": "application/json", ...cors } }
       );
+    }
+
+    // Cargo/setor definidos pelo admin no convite (o perfil já foi criado pelo trigger handle_new_user)
+    if (invite.cargo || invite.setor) {
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .update({ cargo: invite.cargo, setor: invite.setor })
+        .eq("user_id", userData.user!.id);
+      if (profileError) console.error("Error setting cargo/setor:", profileError.message);
+    }
+
+    // Workspaces escolhidos pelo admin no convite (sem isso o usuário entra sem ver nada)
+    if (invite.workspace_ids?.length) {
+      // Só os que ainda existem (um workspace pode ter sido excluído depois do convite)
+      const { data: existentes } = await supabaseAdmin
+        .from("workspaces")
+        .select("id")
+        .in("id", invite.workspace_ids);
+      if (existentes?.length) {
+        const { error: membrosError } = await supabaseAdmin
+          .from("workspace_membros")
+          .upsert(
+            existentes.map((w: { id: string }) => ({ workspace_id: w.id, user_id: userData.user!.id })),
+            { onConflict: "workspace_id,user_id", ignoreDuplicates: true }
+          );
+        if (membrosError) console.error("Error adding workspace membros:", membrosError.message);
+      }
     }
 
     // Assign viewer role to new user

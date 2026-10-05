@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/components/AuthProvider";
 import { usePastas, usePastaBreadcrumb } from "@/hooks/usePastas";
 import { useArquivos, useMoveArquivo, Arquivo } from "@/hooks/useArquivos";
+import { usePastaAcoes } from "@/hooks/usePastaPermissoes";
+import { useVinculosCountPorPasta } from "@/hooks/usePastaVinculos";
+import { useSignedUrl } from "@/lib/storage";
 import { toast } from "sonner";
 import { CreatePastaDialog } from "@/components/CreatePastaDialog";
 import { UploadArquivoDialog } from "@/components/UploadArquivoDialog";
@@ -21,7 +24,8 @@ import { AnimatedMasonry, MasonryItem } from "@/components/AnimatedMasonry";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ChevronLeft, Home, ChevronRight, Folder, FileX, LayoutGrid, List, MapPin, Pencil, Building2, Columns3 } from "lucide-react";
+import { ChevronLeft, Home, ChevronRight, Folder, LayoutGrid, List, MapPin, Pencil, Building2, Columns3, Loader2, FolderOpen, FolderPlus, Upload, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import type { Obra } from "@/hooks/useObras";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -58,6 +62,11 @@ const ObraDetail = () => {
   const { data: pastas, isLoading: pastasLoading } = usePastas(obraId!, pastaId);
   const { data: arquivos, isLoading: arquivosLoading } = useArquivos(obraId!, pastaId);
   const { data: breadcrumb } = usePastaBreadcrumb(pastaId || null);
+  const { data: pastaAcoes } = usePastaAcoes(pastaId, obra?.workspace_id);
+  const { url: signedFoto } = useSignedUrl(obra?.foto_url);
+
+  // Pode adicionar conteúdo aqui? Editores sempre; membros se tiverem 'add' na pasta atual.
+  const canAddHere = canEdit || (!!pastaId && (pastaAcoes ?? []).includes("add"));
 
   const isLoading = obraLoading || pastasLoading || arquivosLoading;
 
@@ -65,6 +74,11 @@ const ObraDetail = () => {
   const filteredPastas = pastas?.filter((pasta) =>
     pasta.nome.toLowerCase().includes(searchValue.toLowerCase())
   );
+
+  // Contagem de vínculos cross-workspace por pasta (badge de "compartilhada").
+  // Só relevante na raiz da obra (pastas raiz podem ser vinculadas).
+  const pastaIdsParaContagem = !pastaId && pastas ? pastas.map((p) => p.id) : [];
+  const { data: vinculosCountMap } = useVinculosCountPorPasta(pastaIdsParaContagem);
   const filteredArquivos = arquivos?.filter((arquivo) =>
     arquivo.nome.toLowerCase().includes(searchValue.toLowerCase())
   );
@@ -117,8 +131,8 @@ const ObraDetail = () => {
         <AppHeader />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Obra não encontrada</h1>
-            <Link to="/">
+            <h1 className="text-2xl font-bold mb-4">Coleção não encontrada</h1>
+            <Link to="/home">
               <Button>Voltar ao início</Button>
             </Link>
           </div>
@@ -130,8 +144,8 @@ const ObraDetail = () => {
   return (
     <AppLayout>
       <AppHeader
-        showUpload={canEdit}
-        showNewFolder={canEdit}
+        showUpload={canAddHere}
+        showNewFolder={canAddHere}
         onUploadClick={() => setUploadOpen(true)}
         onNewFolderClick={() => setCreatePastaOpen(true)}
         searchValue={searchValue}
@@ -141,19 +155,19 @@ const ObraDetail = () => {
       <div className="flex-1 overflow-auto p-6">
         {/* Header with obra info */}
         <div className="mb-6">
-          <Link to="/">
+          <Link to={`/workspace/${obra.workspace_id}`}>
             <Button variant="ghost" size="sm" className="mb-4">
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Voltar às Obras
+              Voltar ao Workspace
             </Button>
           </Link>
 
           <div className="flex items-start gap-4">
             {/* Obra Photo */}
             <div className="rounded-xl overflow-hidden bg-muted flex-shrink-0 flex items-center justify-center shadow-sm" style={{ width: 100, height: 100 }}>
-              {obra.foto_url ? (
+              {obra.foto_url && signedFoto ? (
                 <img
-                  src={obra.foto_url}
+                  src={signedFoto}
                   alt={obra.nome}
                   className="h-full w-full object-cover"
                 />
@@ -164,8 +178,9 @@ const ObraDetail = () => {
 
             {/* Obra Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold truncate">{obra.nome}</h1>
+                <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold tabular-nums text-muted-foreground">{obra.codigo}</span>
                 {canEdit && (
                   <Button
                     variant="ghost"
@@ -190,8 +205,9 @@ const ObraDetail = () => {
           </div>
         </div>
 
-        {/* Breadcrumb - also drop target for root */}
-        <nav className="flex items-center gap-2 text-sm mb-6 flex-wrap">
+        {/* Breadcrumb + view toggle */}
+        <div className="flex items-center justify-between gap-3 mb-6">
+        <nav className="flex items-center gap-2 text-sm flex-wrap min-w-0 flex-1">
           <div
             className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${isDragOverRoot
                 ? "bg-primary/10 ring-2 ring-primary ring-dashed"
@@ -244,12 +260,11 @@ const ObraDetail = () => {
           ))}
         </nav>
 
-        {/* Actions */}
-        <div className="flex items-center justify-end mb-6">
           <ToggleGroup
             type="single"
             value={viewMode}
             onValueChange={(value) => value && setViewMode(value as "list" | "grid" | "masonry")}
+            className="shrink-0"
           >
             <ToggleGroupItem value="masonry" aria-label="Visualização Pinterest">
               <Columns3 className="h-4 w-4" />
@@ -314,13 +329,21 @@ const ObraDetail = () => {
                 {pastaViewMode === "grid" ? (
                   <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                     {filteredPastas.map((pasta) => (
-                      <PastaItem key={pasta.id} pasta={pasta} />
+                      <PastaItem
+                        key={pasta.id}
+                        pasta={pasta}
+                        vinculoCount={vinculosCountMap?.get(pasta.id) ?? 0}
+                      />
                     ))}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
                     {filteredPastas.map((pasta) => (
-                      <PastaListItem key={pasta.id} pasta={pasta} />
+                      <PastaListItem
+                        key={pasta.id}
+                        pasta={pasta}
+                        vinculoCount={vinculosCountMap?.get(pasta.id) ?? 0}
+                      />
                     ))}
                   </div>
                 )}
@@ -385,13 +408,38 @@ const ObraDetail = () => {
 
             {/* Empty State */}
             {(!filteredPastas || filteredPastas.length === 0) && (!filteredArquivos || filteredArquivos.length === 0) && (
-              <div className="text-center py-16">
-                <FileX className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Pasta vazia</h2>
-                <p className="text-muted-foreground">
-                  Crie uma pasta ou faça upload de arquivos para começar.
-                </p>
-              </div>
+              searchValue ? (
+                <EmptyState
+                  icon={SearchX}
+                  title="Nada encontrado"
+                  description={`Nenhuma pasta ou arquivo com "${searchValue}" aqui.`}
+                >
+                  <Button variant="outline" onClick={() => setSearchValue("")}>Limpar busca</Button>
+                </EmptyState>
+              ) : (
+                <EmptyState
+                  icon={FolderOpen}
+                  title="Esta pasta está vazia"
+                  description={
+                    canAddHere
+                      ? "Envie arquivos ou crie uma pasta para organizar os documentos."
+                      : "Ainda não há arquivos aqui."
+                  }
+                >
+                  {canAddHere && (
+                    <>
+                      <Button onClick={() => setUploadOpen(true)} className="gap-2">
+                        <Upload className="h-4 w-4" />
+                        Enviar arquivos
+                      </Button>
+                      <Button variant="outline" onClick={() => setCreatePastaOpen(true)} className="gap-2">
+                        <FolderPlus className="h-4 w-4" />
+                        Nova pasta
+                      </Button>
+                    </>
+                  )}
+                </EmptyState>
+              )
             )}
           </>
         )}

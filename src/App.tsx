@@ -6,16 +6,20 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "@/components/AuthProvider";
 import { useRealtimeSubscriptions } from "@/hooks/useRealtimeSubscriptions";
 import { UploadProvider } from "./contexts/UploadContext";
+import { ChatProvider } from "./contexts/ChatContext";
 import { UploadProgress } from "./components/UploadProgress";
 import { MobileSplashScreen } from "./components/MobileSplashScreen";
 import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
+import WorkspaceDetail from "./pages/WorkspaceDetail";
 import ObraDetail from "./pages/ObraDetail";
+import PublicSharePage from "./pages/PublicSharePage";
 import Favoritos from "./pages/Favoritos";
 import Perfil from "./pages/Perfil";
 import Lixeira from "./pages/Lixeira";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,7 +54,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;
@@ -62,13 +66,18 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+      <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/workspace/:workspaceId" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
       <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />
       <Route path="/lixeira" element={<ProtectedRoute><Lixeira /></ProtectedRoute>} />
       <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/obra/:obraId" element={<ProtectedRoute><ObraDetail /></ProtectedRoute>} />
       <Route path="/obra/:obraId/pasta/:pastaId" element={<ProtectedRoute><ObraDetail /></ProtectedRoute>} />
+      {/* Rotas públicas (sem login) */}
+      <Route path="/arquivos/p/:shortCode" element={<PublicSharePage />} />
+      <Route path="/arquivos/p/:shortCode/pasta/:pastaId" element={<PublicSharePage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -82,9 +91,11 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <UploadProvider>
-            <MobileSplashScreen />
-            <AppRoutes />
-            <UploadProgress />
+            <ChatProvider>
+              <MobileSplashScreen />
+              <AppRoutes />
+              <UploadProgress />
+            </ChatProvider>
           </UploadProvider>
         </AuthProvider>
       </BrowserRouter>

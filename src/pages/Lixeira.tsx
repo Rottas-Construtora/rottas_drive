@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useTrashArquivos, useRestoreArquivo, useDeletePermanently, useEmptyTrash } from "@/hooks/useArquivos";
 import { useTrashPastas, useRestorePasta, useDeletePastaPermanently } from "@/hooks/usePastas";
+import { useWorkspaces } from "@/hooks/useWorkspaces";
+import { WorkspaceFilter } from "@/components/WorkspaceFilter";
 import { TrashArquivoItem } from "@/components/TrashArquivoItem";
 import { TrashPastaItem } from "@/components/TrashPastaItem";
 import { TrashItemSkeleton } from "@/components/skeletons/TrashItemSkeleton";
@@ -19,19 +22,41 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuthContext } from "@/components/AuthProvider";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function Lixeira() {
   const { data: trashArquivos, isLoading: loadingArquivos } = useTrashArquivos();
   const { data: trashPastas, isLoading: loadingPastas } = useTrashPastas();
+  const { data: workspaces } = useWorkspaces();
   const restoreArquivo = useRestoreArquivo();
   const deletePermanently = useDeletePermanently();
   const emptyTrash = useEmptyTrash();
   const restorePasta = useRestorePasta();
   const deletePastaPermanently = useDeletePastaPermanently();
-  const { canEdit } = useAuthContext();
+  const { canEdit, isAdmin } = useAuthContext();
+
+  const [workspaceFilter, setWorkspaceFilter] = useState<string>("all");
+
+  const showFilter = isAdmin || (workspaces?.length ?? 0) > 1;
+
+  const filterByWorkspace = <T extends { obras: { workspace_id: string | null } | null }>(
+    items: T[] | undefined
+  ): T[] => {
+    if (!items) return [];
+    if (workspaceFilter === "all") return items;
+    return items.filter((it) => it.obras?.workspace_id === workspaceFilter);
+  };
+
+  const filteredArquivos = filterByWorkspace(trashArquivos);
+  const filteredPastas = filterByWorkspace(trashPastas);
 
   const isLoading = loadingArquivos || loadingPastas;
-  const totalItems = (trashArquivos?.length || 0) + (trashPastas?.length || 0);
+  const totalItems = filteredArquivos.length + filteredPastas.length;
+
+  const activeWorkspaceNome =
+    workspaceFilter === "all"
+      ? null
+      : workspaces?.find((w) => w.id === workspaceFilter)?.nome ?? null;
 
   const handleRestore = async (id: string) => {
     try {
@@ -71,13 +96,19 @@ export default function Lixeira() {
 
   const handleEmptyTrash = async () => {
     try {
-      // Delete all pastas permanently
-      if (trashPastas) {
-        for (const pasta of trashPastas) {
-          await deletePastaPermanently.mutateAsync(pasta.id);
+      for (const pasta of filteredPastas) {
+        await deletePastaPermanently.mutateAsync(pasta.id);
+      }
+      if (workspaceFilter === "all") {
+        await emptyTrash.mutateAsync();
+      } else {
+        for (const arq of filteredArquivos) {
+          await deletePermanently.mutateAsync({
+            id: arq.id,
+            arquivoUrl: arq.arquivo_url,
+          });
         }
       }
-      await emptyTrash.mutateAsync();
       toast.success("Lixeira esvaziada com sucesso!");
     } catch (error) {
       toast.error("Erro ao esvaziar lixeira");
@@ -87,7 +118,7 @@ export default function Lixeira() {
   return (
     <AppLayout>
       <div className="p-4 md:p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <Trash2 className="h-8 w-8 text-muted-foreground" />
             <div>
@@ -98,37 +129,49 @@ export default function Lixeira() {
             </div>
           </div>
 
-          {canEdit && totalItems > 0 && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Esvaziar Lixeira
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                    Esvaziar Lixeira?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação irá excluir permanentemente todos os {totalItems} item(ns) da lixeira. 
-                    Esta ação não pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleEmptyTrash}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Esvaziar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          <div className="flex items-center gap-2">
+            {showFilter && (
+              <WorkspaceFilter
+                value={workspaceFilter}
+                onChange={setWorkspaceFilter}
+                workspaces={workspaces ?? []}
+              />
+            )}
+            {canEdit && totalItems > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Esvaziar Lixeira
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      {activeWorkspaceNome
+                        ? `Esvaziar Lixeira do workspace ${activeWorkspaceNome}?`
+                        : "Esvaziar Lixeira?"}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação irá excluir permanentemente todos os {totalItems} item(ns)
+                      {activeWorkspaceNome ? ` do workspace ${activeWorkspaceNome}` : " da lixeira"}.
+                      Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleEmptyTrash}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Esvaziar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
 
         {isLoading ? (
@@ -138,16 +181,18 @@ export default function Lixeira() {
             ))}
           </div>
         ) : totalItems === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Trash2 className="h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground">A lixeira está vazia</h3>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Arquivos e pastas excluídos aparecerão aqui
-            </p>
-          </div>
+          <EmptyState
+            icon={Trash2}
+            title="A lixeira está vazia"
+            description={
+              activeWorkspaceNome
+                ? `Nada foi excluído no workspace ${activeWorkspaceNome}.`
+                : "Arquivos e pastas excluídos ficam aqui por 30 dias, e você pode restaurá-los a qualquer momento."
+            }
+          />
         ) : (
           <div className="space-y-2">
-            {trashPastas?.map((pasta) => (
+            {filteredPastas.map((pasta) => (
               <TrashPastaItem
                 key={pasta.id}
                 pasta={pasta}
@@ -155,7 +200,7 @@ export default function Lixeira() {
                 onDeletePermanently={() => handleDeletePastaPermanently(pasta.id)}
               />
             ))}
-            {trashArquivos?.map((arquivo) => (
+            {filteredArquivos.map((arquivo) => (
               <TrashArquivoItem
                 key={arquivo.id}
                 arquivo={arquivo}

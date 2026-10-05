@@ -23,7 +23,7 @@ export function AppHeader({
   showNewFolder = false
 }: AppHeaderProps) {
   return (
-    <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-10">
+    <header className="sticky top-0 z-10 flex min-h-12 shrink-0 items-center justify-between gap-2 border-b border-border bg-card px-3 py-2 safe-pt safe-px md:px-4 md:rounded-tl-2xl">
       {/* LEFT: Action buttons (Google Drive style) */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {showNewFolder && onNewFolderClick && (
@@ -43,7 +43,7 @@ export function AppHeader({
               variant="outline"
               size="icon"
               onClick={onNewFolderClick}
-              className="sm:hidden h-9 w-9"
+              className="sm:hidden"
             >
               <FolderPlus className="h-4 w-4" />
             </Button>
@@ -64,7 +64,7 @@ export function AppHeader({
               variant="default"
               size="icon"
               onClick={onUploadClick}
-              className="sm:hidden h-9 w-9"
+              className="sm:hidden"
             >
               <Upload className="h-4 w-4" />
             </Button>

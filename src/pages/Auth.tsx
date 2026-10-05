@@ -1,44 +1,44 @@
 import { useState, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
-import Grainient from "@/components/Grainient";
+import { FileRunners } from "@/components/FileRunners";
 import { CheckCircle, Loader2, Camera, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const GrainientBackground = () => (
-  <div className="absolute inset-0 z-0">
-    <Grainient
-      color1="#f2930d"
-      color2="#ffd294"
-      color3="#fcb045"
-      timeSpeed={0.25}
-      colorBalance={0}
-      warpStrength={1}
-      warpFrequency={5}
-      warpSpeed={2}
-      warpAmplitude={50}
-      blendAngle={0}
-      blendSoftness={0.05}
-      rotationAmount={500}
-      noiseScale={2}
-      grainAmount={0.1}
-      grainScale={2}
-      grainAnimated={false}
-      contrast={1.5}
-      gamma={1}
-      saturation={1}
-      centerX={0}
-      centerY={0}
-      zoom={0.9}
-    />
+const AuthShell = ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => (
+  <div className="min-h-screen grid grid-cols-[repeat(auto-fit,minmax(min(360px,100%),1fr))] bg-white text-[#1a1a1a] overflow-x-clip">
+    <section className="hidden md:flex bg-[#fafafa] border-r border-[#e2e8f0] flex-col items-center justify-center gap-7 px-10 py-12 min-w-0">
+      <div className="w-full max-w-[520px]">
+        <FileRunners />
+      </div>
+      <div className="flex flex-col items-center gap-1.5 text-center max-w-[420px]">
+        <div className="text-xl font-semibold tracking-[-.01em]">
+          Seus arquivos, <span className="text-[#f29f05]">num só lugar.</span>
+        </div>
+        <div className="text-sm leading-normal text-[#64748b]">Vídeos, fotos, tabelas e apresentações.</div>
+      </div>
+    </section>
+    <section className="flex items-center justify-center px-4 sm:px-8 py-12 min-w-0">
+      <div className="w-full max-w-[380px] flex flex-col gap-7">
+        <div className="flex flex-col items-center gap-7 text-center">
+          <Link to="/" aria-label="Voltar para a página inicial"><img src={logo} alt="Rottas Drive" className="w-14 h-14 object-contain" /></Link>
+          <div className="flex flex-col gap-2">
+            <h1 className="m-0 text-[28px] font-bold tracking-[-.02em]">{title}</h1>
+            <p className="m-0 text-[15px] text-[#64748b]">{description}</p>
+          </div>
+        </div>
+        {children}
+      </div>
+    </section>
   </div>
 );
+
+const submitClass = "w-full h-12 rounded-[10px] bg-[#f29f05] hover:bg-[#e0930a] text-white text-base font-semibold";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ const Auth = () => {
       toast.error("Email ou senha inválidos.");
     } else {
       toast.success("Login realizado com sucesso!");
-      navigate("/");
+      navigate("/home");
     }
     setLoading(false);
   };
@@ -230,7 +230,7 @@ const Auth = () => {
 
       setInviteStep("done");
       toast.success("Conta criada com sucesso!");
-      setTimeout(() => navigate("/"), 1500);
+      setTimeout(() => navigate("/home"), 1500);
     } catch {
       toast.error("Erro ao criar conta.");
     }
@@ -240,24 +240,15 @@ const Auth = () => {
   // Render invite flow
   if (inviteToken) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center p-4">
-        <GrainientBackground />
-        <Card className="w-full max-w-md relative z-10 shadow-2xl backdrop-blur-sm bg-card/95">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <img src={logo} alt="Logo" style={{ width: 60, height: 60 }} />
-            </div>
-            <CardTitle className="text-2xl">
-              {inviteStep === "done" ? "Conta Criada!" : inviteStep === "profile" ? "Configure seu Perfil" : "Criar Conta"}
-            </CardTitle>
-            <CardDescription>
-              {inviteStep === "validate" && "Insira seu email para validar o convite"}
-              {inviteStep === "register" && "Defina sua senha para continuar"}
-              {inviteStep === "profile" && "Informe seu nome e foto de perfil"}
-              {inviteStep === "done" && "Você será redirecionado em instantes..."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      <AuthShell
+        title={inviteStep === "done" ? "Conta Criada!" : inviteStep === "profile" ? "Configure seu Perfil" : "Criar Conta"}
+        description={{
+          validate: "Insira seu email para validar o convite",
+          register: "Defina sua senha para continuar",
+          profile: "Informe seu nome e foto de perfil",
+          done: "Você será redirecionado em instantes...",
+        }[inviteStep]}
+      >
             {inviteStep === "done" ? (
               <div className="flex flex-col items-center gap-4 py-4">
                 <CheckCircle className="h-12 w-12 text-green-500" />
@@ -281,7 +272,7 @@ const Auth = () => {
                     Use o mesmo email para o qual o convite foi enviado.
                   </p>
                 </div>
-                <Button type="submit" className="w-full" disabled={validatingInvite}>
+                <Button type="submit" className={submitClass} disabled={validatingInvite}>
                   {validatingInvite ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -329,7 +320,7 @@ const Auth = () => {
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className={submitClass}>
                   Continuar
                 </Button>
                 <button
@@ -387,7 +378,7 @@ const Auth = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className={submitClass} disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -406,27 +397,16 @@ const Auth = () => {
                 </button>
               </form>
             ) : null}
-          </CardContent>
-        </Card>
-      </div>
+      </AuthShell>
     );
   }
 
   // Render normal login
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4">
-      <GrainientBackground />
-      <Card className="w-full max-w-md relative z-10 shadow-2xl backdrop-blur-sm bg-card/95">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src={logo} alt="Logo" style={{ width: 60, height: 60 }} />
-          </div>
-          <CardTitle className="text-2xl">Armazenamento Rottas</CardTitle>
-          <CardDescription>
-            {showForgotPassword ? "Recuperar sua senha" : "Faça login para continuar"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <AuthShell
+      title={showForgotPassword ? "Recuperar senha" : "Faça seu login"}
+      description={showForgotPassword ? "Enviaremos um link para seu e-mail." : "Para acessar seus arquivos."}
+    >
           {showForgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div className="space-y-2">
@@ -440,7 +420,7 @@ const Auth = () => {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className={submitClass} disabled={loading}>
                 {loading ? "Enviando..." : "Enviar link de reset"}
               </Button>
               <button
@@ -478,7 +458,7 @@ const Auth = () => {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className={submitClass} disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
               <button
@@ -490,9 +470,7 @@ const Auth = () => {
               </button>
             </form>
           )}
-        </CardContent>
-      </Card>
-    </div>
+    </AuthShell>
   );
 };
 
