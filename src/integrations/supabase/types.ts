@@ -316,6 +316,7 @@ export type Database = {
           setor: string | null
           status: string
           token: string
+          workspace_ids: string[]
         }
         Insert: {
           created_at?: string
@@ -327,6 +328,7 @@ export type Database = {
           setor?: string | null
           status?: string
           token?: string
+          workspace_ids?: string[]
         }
         Update: {
           created_at?: string
@@ -338,6 +340,7 @@ export type Database = {
           setor?: string | null
           status?: string
           token?: string
+          workspace_ids?: string[]
         }
         Relationships: []
       }
@@ -413,6 +416,7 @@ export type Database = {
       }
       obras: {
         Row: {
+          codigo: string
           created_at: string
           descricao: string | null
           endereco: string | null
@@ -423,6 +427,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          codigo?: string
           created_at?: string
           descricao?: string | null
           endereco?: string | null
@@ -433,6 +438,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          codigo?: string
           created_at?: string
           descricao?: string | null
           endereco?: string | null
@@ -726,6 +732,7 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          codigo: string
           cor: string | null
           created_at: string
           descricao: string | null
@@ -735,6 +742,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          codigo?: string
           cor?: string | null
           created_at?: string
           descricao?: string | null
@@ -744,6 +752,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          codigo?: string
           cor?: string | null
           created_at?: string
           descricao?: string | null

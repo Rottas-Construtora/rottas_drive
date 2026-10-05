@@ -94,10 +94,13 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
               </DropdownMenu>
             )}
           </div>
-          <p className="text-sm text-muted-foreground mt-1 truncate">
-            {workspace.obras_count ?? 0}{" "}
-            {(workspace.obras_count ?? 0) === 1 ? "coleção" : "coleções"}
-          </p>
+          <div className="flex items-center gap-2 mt-1 min-w-0">
+            <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold tabular-nums text-muted-foreground">{workspace.codigo}</span>
+            <p className="text-sm text-muted-foreground truncate">
+              {workspace.obras_count ?? 0}{" "}
+              {(workspace.obras_count ?? 0) === 1 ? "coleção" : "coleções"}
+            </p>
+          </div>
         </div>
       </Card>
 

@@ -4,6 +4,7 @@ import { compressCoverImage } from "@/utils/imageCompression";
 
 export interface Obra {
   id: string;
+  codigo: string;
   nome: string;
   descricao: string | null;
   foto_url: string | null;

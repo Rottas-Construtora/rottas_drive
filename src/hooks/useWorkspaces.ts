@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface Workspace {
   id: string;
+  codigo: string;
   nome: string;
   descricao: string | null;
   cor: string | null;
